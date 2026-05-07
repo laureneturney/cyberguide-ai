@@ -4,7 +4,7 @@ from __future__ import annotations
 import streamlit as st
 
 from . import state as S
-from .components import section_header, chat_bubble
+from .components import section_header, chat_bubble, _render_html
 
 
 def render() -> None:
@@ -16,11 +16,10 @@ def render() -> None:
     chat_box = st.container()
     with chat_box:
         if not history:
-            st.markdown(
+            _render_html(
                 '<div class="cg-card"><span class="cg-muted">'
-                "Start the conversation — try: <i>“What should I build first to land a SOC role in 4 months?”</i>"
-                "</span></div>",
-                unsafe_allow_html=True,
+                'Start the conversation — try: <i>“What should I build first to land a SOC role in 4 months?”</i>'
+                '</span></div>'
             )
         for role, content in history:
             chat_bubble(role, content)

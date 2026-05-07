@@ -4,7 +4,7 @@ from __future__ import annotations
 import streamlit as st
 
 from . import state as S
-from .components import section_header, step, empty_state, card
+from .components import section_header, step, empty_state, card, _render_html
 
 
 def render() -> None:
@@ -71,5 +71,5 @@ def render() -> None:
             tags=[("Be aware", "warn")],
         )
 
-    st.markdown('<div class="cg-divider"></div>', unsafe_allow_html=True)
+    _render_html('<div class="cg-divider"></div>')
     st.caption("Disagree with the plan? Tell the agent in Chat or refine your profile and re-plan.")

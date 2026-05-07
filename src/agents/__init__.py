@@ -1,4 +1,11 @@
-from .schemas import UserProfile, Plan, Milestone, DecisionRequest, DecisionResult
+from .schemas import (
+    UserProfile,
+    Plan,
+    Milestone,
+    DecisionRequest,
+    DecisionResult,
+    ResumeAnalysis,
+)
 from .orchestrator import Orchestrator
 
 __all__ = [
@@ -7,5 +14,6 @@ __all__ = [
     "Milestone",
     "DecisionRequest",
     "DecisionResult",
+    "ResumeAnalysis",
     "Orchestrator",
 ]

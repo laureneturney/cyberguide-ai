@@ -5,7 +5,7 @@ import streamlit as st
 
 from ..agents import DecisionRequest
 from . import state as S
-from .components import card, section_header
+from .components import card, section_header, _render_html
 
 
 PRESETS: list[tuple[str, list[str]]] = [
@@ -77,30 +77,24 @@ def render() -> None:
 
     decisions = S.st.session_state[S.K_DECISIONS]
     if not decisions:
-        st.markdown(
-            '<div class="cg-card"><span class="cg-muted">No decisions analyzed yet.</span></div>',
-            unsafe_allow_html=True,
+        _render_html(
+            '<div class="cg-card"><span class="cg-muted">No decisions analyzed yet.</span></div>'
         )
         return
 
     for idx, (req, res) in enumerate(decisions):
-        st.markdown(
-            f"""
-<div class="cg-rec">
-    <div style="display:flex; align-items:center; gap:8px;">
-        <span class="cg-tag ok">Recommendation</span>
-        <b>{res['recommendation']}</b>
-        <span class="cg-tag info" style="margin-left:auto;">
-            confidence {res['confidence']:.2f}
-        </span>
-    </div>
-    <div style="margin-top:8px; font-size:13px;">{res['rationale']}</div>
-    <div class="cg-muted" style="margin-top:6px; font-size:11px;">
-        Human-in-the-loop: please confirm before acting on this recommendation.
-    </div>
-</div>
-""",
-            unsafe_allow_html=True,
+        _render_html(
+            '<div class="cg-rec">'
+            '<div style="display:flex; align-items:center; gap:8px;">'
+            '<span class="cg-tag ok">Recommendation</span>'
+            f'<b>{res["recommendation"]}</b>'
+            f'<span class="cg-tag info" style="margin-left:auto;">confidence {res["confidence"]:.2f}</span>'
+            '</div>'
+            f'<div style="margin-top:8px; font-size:13px;">{res["rationale"]}</div>'
+            '<div class="cg-muted" style="margin-top:6px; font-size:11px;">'
+            'Human-in-the-loop: please confirm before acting on this recommendation.'
+            '</div>'
+            '</div>'
         )
         cols = st.columns(len(res["options"]))
         for i, opt in enumerate(res["options"]):
@@ -124,4 +118,4 @@ def render() -> None:
         with c2:
             if st.button("↩ Revisit later", key=f"rev_{idx}"):
                 st.toast("Will revisit later — no action taken.", icon="↩️")
-        st.markdown('<div class="cg-divider"></div>', unsafe_allow_html=True)
+        _render_html('<div class="cg-divider"></div>')

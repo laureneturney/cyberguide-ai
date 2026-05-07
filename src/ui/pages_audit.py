@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from . import state as S
-from .components import card, section_header
+from .components import card, section_header, _render_html
 
 
 def render() -> None:
@@ -18,9 +18,8 @@ def render() -> None:
 
     audit = S.orch().audit
     if not audit:
-        st.markdown(
-            '<div class="cg-card"><span class="cg-muted">No agent activity yet — interact with the app to populate the trail.</span></div>',
-            unsafe_allow_html=True,
+        _render_html(
+            '<div class="cg-card"><span class="cg-muted">No agent activity yet — interact with the app to populate the trail.</span></div>'
         )
         return
 

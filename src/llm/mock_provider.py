@@ -276,10 +276,78 @@ def _generic_chat(profile: dict, user: str, rng: random.Random) -> str:
     )
 
 
+def _profiler(profile: dict, user: str, rng: random.Random) -> str:
+    # Lightweight keyword scan against the resume text included in the user
+    # block. The real LLM will do better — this is just a sane offline default.
+    text = (user or "").lower()
+
+    keyword_map = {
+        "soc": ["soc", "siem", "splunk", "sentinel", "edr", "incident", "alert", "triage"],
+        "grc": ["grc", "compliance", "risk", "audit", "soc 2", "iso 27001", "nist", "policy"],
+        "appsec": ["appsec", "application security", "owasp", "sast", "dast"],
+        "offensive": ["pentest", "penetration", "red team", "exploit", "burp", "ctf"],
+        "cloud": ["aws", "azure", "gcp", "kubernetes", "terraform"],
+        "iam": ["iam", "okta", "entra", "saml", "oidc", "sso", "mfa"],
+        "dfir": ["forensics", "dfir", "memory analysis", "volatility"],
+        "engineering": ["python", "go ", "devops", "ci/cd", "automation"],
+    }
+    scores = {dom: sum(1 for kw in kws if kw in text) for dom, kws in keyword_map.items()}
+    domain_id = max(scores, key=scores.get) if any(scores.values()) else "soc"
+    role_map = {
+        "soc": "soc_t1", "grc": "grc_analyst", "appsec": "appsec_eng",
+        "offensive": "pentester", "cloud": "cloudsec_eng", "iam": "iam_eng",
+        "dfir": "forensics", "engineering": "junior_sec_eng",
+    }
+    role_id = role_map.get(domain_id, "soc_t1")
+
+    skills: dict[str, int] = {}
+    skill_hints = [
+        ("Networking", ["tcp", "dns", "vpn", "firewall", "wireshark", "network"]),
+        ("Linux", ["linux", "bash", "ubuntu", "centos", "shell"]),
+        ("Windows", ["windows", "active directory", "powershell"]),
+        ("Scripting (Python or PowerShell)", ["python", "powershell", "bash script"]),
+        ("Cloud (AWS/Azure/GCP)", ["aws", "azure", "gcp"]),
+        ("Security tooling (SIEM/EDR)", ["splunk", "sentinel", "crowdstrike", "edr", "siem"]),
+    ]
+    for label, kws in skill_hints:
+        hits = sum(1 for k in kws if k in text)
+        if hits:
+            skills[label] = min(5, 2 + hits)
+
+    cert_hints = ["security+", "cysa+", "ccna", "aws certified", "ceh", "oscp", "pnpt", "sc-900", "isc2 cc"]
+    certs = [c for c in cert_hints if c in text]
+
+    analysis = {
+        "summary": (
+            "Candidate looks like a strong fit for an entry path in cybersecurity, "
+            "with transferable evidence and at least one role-relevant signal."
+        ),
+        "background_label": "Career changer with adjacent technical exposure",
+        "estimated_years_experience": 2.0,
+        "education": "Inferred from resume",
+        "skills_detected": skills or {"Networking": 2, "Linux": 2},
+        "certifications": [c.title() for c in certs],
+        "courses": [],
+        "suggested_domain_id": domain_id,
+        "suggested_role_id": role_id,
+        "rationale": (
+            f"Resume keywords align most strongly with the {domain_id.upper()} domain. "
+            "The recommended role is the most common entry point in that domain."
+        ),
+        "gaps_for_target": [
+            "Public lab artifact (write-up + repo)",
+            "Recruiter-filter certification",
+        ],
+        "confidence": 0.7 if any(scores.values()) else 0.45,
+    }
+    return "```json\n" + json.dumps({"analysis": analysis}, indent=2) + "\n```"
+
+
 _DISPATCH: dict[str, Any] = {
     "PATHFINDER": _pathfinder,
     "RETRIEVER": _retriever,
     "DECISION": _decision_support,
     "CAREER_GRAPH": _career_graph,
+    "PROFILER": _profiler,
     "CHAT": _generic_chat,
 }

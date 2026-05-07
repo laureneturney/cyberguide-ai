@@ -6,6 +6,8 @@ pandas>=2.2.0
 duckduckgo-search>=6.2.0
 openai>=1.40.0
 pydantic>=2.7.0
+pypdf>=4.2.0
+python-docx>=1.1.0
 
 # IBM watsonx.ai SDK is loaded lazily; install only when LLM_PROVIDER=watsonx.
 # Pulling it into the base requirements pins an older pandas, which conflicts

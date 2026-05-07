@@ -5,11 +5,33 @@ Deploy on Streamlit Cloud: just point it at this file in the repo root.
 """
 from __future__ import annotations
 
+import os
+
 import streamlit as st
 
-from src.config import settings
+
+# Bridge Streamlit Cloud secrets into os.environ BEFORE the rest of the app
+# imports `src.config` (which reads via os.getenv). On Streamlit Cloud,
+# secrets entered as TOML are exposed only via st.secrets, not as env vars,
+# so without this hop our config layer would never see them.
+def _bridge_secrets_to_env() -> None:
+    try:
+        # st.secrets raises lazily when no secrets file is present, so the
+        # whole iteration has to be inside the try block — not just the access.
+        for key in st.secrets:
+            value = st.secrets.get(key)
+            if isinstance(value, (str, int, float, bool)) and key not in os.environ:
+                os.environ[key] = str(value)
+    except Exception:
+        return
+
+
+_bridge_secrets_to_env()
+
+from src.config import settings  # noqa: E402  (import after bridge by design)
 from src.ui import state as S
 from src.ui.theme import inject_css, brand_bar
+from src.ui.components import _render_html
 from src.ui import (
     pages_home,
     pages_profile,
@@ -46,19 +68,16 @@ def main() -> None:
 
     with st.sidebar:
         # IBM watsonx is always shown to the user, regardless of LLM_PROVIDER.
-        st.markdown(
-            f"""
-<div style='padding:14px 8px 6px 8px;'>
-  <div style='font-weight:700; font-size:18px;'>CyberGuide.AI</div>
-  <div style='color:#8b97ad; font-size:11px; margin-top:2px;'>
-      Powered by <b>IBM watsonx</b> · {S.orch().display_model}
-  </div>
-</div>
-""",
-            unsafe_allow_html=True,
+        _render_html(
+            "<div style='padding:14px 8px 6px 8px;'>"
+            "<div style='font-weight:700; font-size:18px;'>CyberGuide.AI</div>"
+            f"<div style='color:#8b97ad; font-size:11px; margin-top:2px;'>"
+            f"Powered by <b>IBM watsonx</b> · {S.orch().display_model}"
+            "</div>"
+            "</div>"
         )
 
-        st.markdown('<div style="height:6px;"></div>', unsafe_allow_html=True)
+        _render_html('<div style="height:6px;"></div>')
         for label in PAGES.keys():
             is_active = S.st.session_state[S.K_PAGE] == label
             btn_label = f"{'●  ' if is_active else '○  '}{label}"
@@ -66,14 +85,14 @@ def main() -> None:
                 S.st.session_state[S.K_PAGE] = label
                 st.rerun()
 
-        st.markdown('<div class="cg-divider"></div>', unsafe_allow_html=True)
+        _render_html('<div class="cg-divider"></div>')
         with st.expander("Session controls"):
             if st.button("🧹 Reset session", use_container_width=True):
                 S.reset_session()
                 st.rerun()
             st.caption("Session-only persistence — reloading the page clears the demo state.")
 
-        st.markdown('<div class="cg-divider"></div>', unsafe_allow_html=True)
+        _render_html('<div class="cg-divider"></div>')
         st.caption(
             "Service provider: **IBM watsonx**\n\n"
             "Switch backends via `.env` — the UI stays branded watsonx by design."

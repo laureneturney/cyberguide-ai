@@ -83,3 +83,18 @@ class GraphExplanation(BaseModel):
     core_skills: list[str]
     evidence_employers_value: list[str]
     common_first_role: str
+
+
+class ResumeAnalysis(BaseModel):
+    summary: str
+    background_label: str  # short, fit for UserProfile.background
+    estimated_years_experience: float = 0.0
+    education: str = ""
+    skills_detected: dict[str, int] = Field(default_factory=dict)  # 1-5
+    certifications: list[str] = Field(default_factory=list)
+    courses: list[str] = Field(default_factory=list)
+    suggested_domain_id: str = ""
+    suggested_role_id: str = ""
+    rationale: str = ""
+    gaps_for_target: list[str] = Field(default_factory=list)
+    confidence: float = 0.6

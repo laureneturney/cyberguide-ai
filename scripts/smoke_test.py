@@ -73,6 +73,24 @@ def main() -> int:
     hits = web_search("CompTIA Security+ syllabus 2026", max_results=2)
     print(f"\nweb_search returned {len(hits)} hits (source: {hits[0].source if hits else 'none'})")
 
+    # Resume profiler end-to-end
+    sample_resume = """
+    Jordan Smith — Career Changer
+    Education: B.A. in History, 2020.
+    Experience: 3 years IT helpdesk at a regional bank — ticket triage, AD password resets, basic networking.
+    Built a home Splunk lab on Sysmon-instrumented Windows VMs.
+    Published 4 TryHackMe SOC L1 walkthroughs on a personal blog.
+    Studying for CompTIA Security+ (SY0-701).
+    """
+    analysis = o.analyze_resume(sample_resume)
+    assert analysis.suggested_role_id, "profiler should suggest a role"
+    print(f"✓ resume profiler: suggested {analysis.suggested_role_id} "
+          f"in {analysis.suggested_domain_id} (confidence={analysis.confidence:.2f})")
+    print(f"  skills detected: {list(analysis.skills_detected.items())[:3]}")
+    merged = o.apply_resume_to_profile(UserProfile(), analysis)
+    assert merged.preferred_domain == analysis.suggested_domain_id
+    print(f"✓ profile merge produced domain={merged.preferred_domain} role={merged.target_role}")
+
     print("\nALL CHECKS PASSED")
     return 0
 

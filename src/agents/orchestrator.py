@@ -17,6 +17,7 @@ from ..llm import LLMMessage, get_provider
 from .career_graph import CareerGraphAgent
 from .decision_support import DecisionSupportAgent
 from .pathfinder import PathfinderAgent
+from .profiler import ResumeProfilerAgent
 from .prompts import CHAT_SYSTEM
 from .retriever import RetrieverAgent
 from .schemas import (
@@ -24,6 +25,7 @@ from .schemas import (
     DecisionResult,
     GraphExplanation,
     Plan,
+    ResumeAnalysis,
     RetrievedResource,
     UserProfile,
 )
@@ -44,6 +46,7 @@ class Orchestrator:
         self.pathfinder = PathfinderAgent()
         self.retriever = RetrieverAgent()
         self.decision = DecisionSupportAgent()
+        self.profiler = ResumeProfilerAgent()
         self.audit: list[AuditEntry] = []
 
     # ---- backend identity -------------------------------------------------
@@ -90,6 +93,40 @@ class Orchestrator:
             {"focus": focus, "n": len(result)},
         )
         return result
+
+    def analyze_resume(self, resume_text: str) -> ResumeAnalysis:
+        result = self.profiler.analyze(resume_text)
+        self._log(
+            "resume_profiler",
+            "analyze",
+            (
+                f"Analyzed {len(resume_text or '')}-char resume; "
+                f"suggested {result.suggested_role_id or '(none)'} "
+                f"in domain {result.suggested_domain_id or '(none)'} "
+                f"(confidence={result.confidence:.2f})."
+            ),
+            {
+                "chars": len(resume_text or ""),
+                "suggested_domain_id": result.suggested_domain_id,
+                "suggested_role_id": result.suggested_role_id,
+                "confidence": result.confidence,
+            },
+        )
+        return result
+
+    def apply_resume_to_profile(
+        self, base: UserProfile, analysis: ResumeAnalysis
+    ) -> UserProfile:
+        """Merge analysis fields into a profile without overwriting non-empty user inputs."""
+        return base.model_copy(
+            update={
+                "background": base.background or analysis.background_label,
+                "education": base.education or analysis.education,
+                "preferred_domain": base.preferred_domain or analysis.suggested_domain_id,
+                "target_role": base.target_role or analysis.suggested_role_id,
+                "skills_self_rated": {**analysis.skills_detected, **(base.skills_self_rated or {})},
+            }
+        )
 
     def decide(self, profile: UserProfile, request: DecisionRequest) -> DecisionResult:
         result = self.decision.decide(profile, request)

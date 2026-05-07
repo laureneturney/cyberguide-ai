@@ -4,7 +4,7 @@ from __future__ import annotations
 import streamlit as st
 
 from . import state as S
-from .components import card, section_header, pill
+from .components import card, section_header, pill, _render_html
 
 
 def render() -> None:
@@ -44,7 +44,7 @@ def render() -> None:
             tags=[("Auditable", "info")],
         )
 
-    st.markdown('<div class="cg-divider"></div>', unsafe_allow_html=True)
+    _render_html('<div class="cg-divider"></div>')
 
     section_header("How CyberGuide works", "Four coordinated agents — one career navigation system.")
     g = st.columns(4)
@@ -58,7 +58,7 @@ def render() -> None:
         with col:
             card(title, f"<span class='cg-muted'>{body}</span>")
 
-    st.markdown('<div class="cg-divider"></div>', unsafe_allow_html=True)
+    _render_html('<div class="cg-divider"></div>')
 
     section_header("Get started", "")
     c1, c2, c3 = st.columns(3)
@@ -75,17 +75,14 @@ def render() -> None:
             S.st.session_state[S.K_PAGE] = "Roadmap"
             st.rerun()
 
-    st.markdown(
-        f"""
-<div class="cg-card" style="margin-top:18px;">
-    <h4>Why this is built differently</h4>
-    <ul style="margin: 6px 0 0 18px; color: var(--cg-text); font-size:13px;">
-      <li><b>Personalized</b> to your background, hours, and timeline — not one-size-fits-all.</li>
-      <li><b>Transparent</b>: every recommendation comes with a rationale you can challenge.</li>
-      <li><b>Human-in-the-loop</b> on key forks: the agent advises; you decide.</li>
-      <li><b>No fabrication</b>: when knowledge is thin, CyberGuide says so and uses fallback templates.</li>
-    </ul>
-</div>
-""",
-        unsafe_allow_html=True,
+    _render_html(
+        '<div class="cg-card" style="margin-top:18px;">'
+        '<h4>Why this is built differently</h4>'
+        '<ul style="margin: 6px 0 0 18px; color: var(--cg-text); font-size:13px;">'
+        '<li><b>Personalized</b> to your background, hours, and timeline — not one-size-fits-all.</li>'
+        '<li><b>Transparent</b>: every recommendation comes with a rationale you can challenge.</li>'
+        '<li><b>Human-in-the-loop</b> on key forks: the agent advises; you decide.</li>'
+        '<li><b>No fabrication</b>: when knowledge is thin, CyberGuide says so and uses fallback templates.</li>'
+        '</ul>'
+        '</div>'
     )

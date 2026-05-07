@@ -186,19 +186,22 @@ def inject_css() -> None:
 
 
 def brand_bar(*, environment_pill: str | None = None) -> None:
-    pill_html = ""
-    if environment_pill:
-        pill_html = f'<span class="pill">{environment_pill}</span>'
-    st.markdown(
-        f"""
-<div class="cg-brand">
-    <div class="logo"></div>
-    <div>
-        <div class="title">CyberGuide.AI</div>
-        <div class="sub">Agentic career navigation for cybersecurity • powered by IBM watsonx</div>
-    </div>
-    {pill_html}
-</div>
-        """,
-        unsafe_allow_html=True,
+    pill_html = (
+        f'<span class="pill">{environment_pill}</span>' if environment_pill else ""
     )
+    # Use st.html() (Streamlit 1.33+) so the markup never touches the
+    # markdown parser — bulletproof against CommonMark's HTML-block rules.
+    markup = (
+        '<div class="cg-brand">'
+        '<div class="logo"></div>'
+        '<div>'
+        '<div class="title">CyberGuide.AI</div>'
+        '<div class="sub">Agentic career navigation for cybersecurity • powered by IBM watsonx</div>'
+        '</div>'
+        f"{pill_html}"
+        '</div>'
+    )
+    if hasattr(st, "html"):
+        st.html(markup)
+    else:
+        st.markdown(markup, unsafe_allow_html=True)

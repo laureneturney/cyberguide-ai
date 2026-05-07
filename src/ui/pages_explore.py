@@ -5,7 +5,7 @@ import streamlit as st
 
 from ..data import DOMAINS, EVIDENCE_BY_ROLE, list_roles, role_detail
 from . import state as S
-from .components import card, section_header, pill
+from .components import card, section_header, pill, _render_html
 from .graph_view import build_graph_figure
 
 
@@ -33,7 +33,7 @@ def render() -> None:
             else 1 + [r["id"] for r in roles_pool].index(p.target_role),
         )
 
-        st.markdown('<div class="cg-divider"></div>', unsafe_allow_html=True)
+        _render_html('<div class="cg-divider"></div>')
 
         explain = st.button("🤖 Explain this corner of the field", use_container_width=True)
         if explain:

@@ -4,7 +4,7 @@ from __future__ import annotations
 import streamlit as st
 
 from . import state as S
-from .components import card, section_header
+from .components import card, section_header, _render_html
 
 
 def render() -> None:
@@ -31,11 +31,10 @@ def render() -> None:
 
     results = S.st.session_state[S.K_RESOURCES]
     if not results:
-        st.markdown(
+        _render_html(
             '<div class="cg-card"><span class="cg-muted">'
-            "No resources retrieved yet. Click <b>Retrieve resources</b> above."
-            "</span></div>",
-            unsafe_allow_html=True,
+            'No resources retrieved yet. Click <b>Retrieve resources</b> above.'
+            '</span></div>'
         )
         return
 

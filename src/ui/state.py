@@ -20,6 +20,8 @@ K_RESOURCES = "cg_resources"  # last retrieval
 K_ORCH = "cg_orchestrator"
 K_PAGE = "cg_page"
 K_MILESTONE_PROGRESS = "cg_milestone_progress"  # dict[milestone_idx] -> bool
+K_RESUME_ANALYSIS = "cg_resume_analysis"  # last ResumeAnalysis (dict-serialized)
+K_RESUME_TEXT = "cg_resume_text"  # last parsed resume text (for re-analysis)
 
 
 def ensure_state() -> None:
@@ -39,6 +41,10 @@ def ensure_state() -> None:
         st.session_state[K_PAGE] = "Home"
     if K_MILESTONE_PROGRESS not in st.session_state:
         st.session_state[K_MILESTONE_PROGRESS] = {}
+    if K_RESUME_ANALYSIS not in st.session_state:
+        st.session_state[K_RESUME_ANALYSIS] = None
+    if K_RESUME_TEXT not in st.session_state:
+        st.session_state[K_RESUME_TEXT] = ""
 
 
 def reset_session() -> None:
