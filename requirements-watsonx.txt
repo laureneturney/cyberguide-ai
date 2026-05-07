@@ -1,0 +1,2 @@
+# Optional extras — install only when LLM_PROVIDER=watsonx.
+ibm-watsonx-ai>=1.1.0

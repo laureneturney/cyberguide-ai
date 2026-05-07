@@ -1,0 +1,13 @@
+streamlit>=1.36.0
+python-dotenv>=1.0.1
+requests>=2.32.0
+plotly>=5.22.0
+pandas>=2.2.0
+duckduckgo-search>=6.2.0
+openai>=1.40.0
+pydantic>=2.7.0
+
+# IBM watsonx.ai SDK is loaded lazily; install only when LLM_PROVIDER=watsonx.
+# Pulling it into the base requirements pins an older pandas, which conflicts
+# with newer Streamlit on Python 3.12+.
+#   pip install -r requirements-watsonx.txt
