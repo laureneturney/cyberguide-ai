@@ -114,6 +114,52 @@ class Orchestrator:
         )
         return result
 
+    def build_profile_from_inputs(
+        self,
+        *,
+        goals_text: str,
+        resume_text: str = "",
+        weekly_hours: int = 8,
+        timeline_weeks: int = 16,
+        budget_usd: int = 500,
+        domain_id: str = "",
+        role_id: str = "",
+        name: str = "",
+    ) -> tuple[UserProfile, ResumeAnalysis]:
+        """Single entry point used by the Roadmap page.
+
+        Concatenates the user's stated goals with any uploaded resume, runs
+        the Resume Profiler over the combined text to extract skills /
+        suggested role / suggested domain, and merges the result with the
+        UI-supplied scalar fields (hours, timeline, budget, optional name).
+
+        Returns the profile AND the analysis so the UI can show *what the
+        agent inferred* alongside the plan.
+        """
+        combined = ((goals_text or "") + "\n\n" + (resume_text or "")).strip()
+        analysis = self.profiler.analyze(combined) if combined else ResumeAnalysis(
+            summary="No goals or resume supplied.",
+            background_label="",
+            confidence=0.0,
+        )
+
+        profile = UserProfile(
+            name=(name or "").strip(),
+            background=analysis.background_label or (goals_text or "")[:120].strip(),
+            education=analysis.education,
+            weekly_hours=int(weekly_hours),
+            timeline_weeks=int(timeline_weeks),
+            budget_usd=int(budget_usd),
+            constraints="",  # the agent will pick these up from goals_text via the prompt
+            preferred_domain=domain_id or analysis.suggested_domain_id,
+            target_role=role_id or analysis.suggested_role_id,
+            skills_self_rated=analysis.skills_detected,
+            interests=[],
+            location="",
+        )
+        # Stash the raw goals so the chat-with-pathfinder thread can reference them.
+        return profile, analysis
+
     def apply_resume_to_profile(
         self, base: UserProfile, analysis: ResumeAnalysis
     ) -> UserProfile:

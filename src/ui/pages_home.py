@@ -13,35 +13,33 @@ def render() -> None:
         "An agentic, transparent navigator for your path into cybersecurity.",
     )
 
-    p = S.profile()
-    has_profile = bool(p.preferred_domain or p.target_role)
     has_plan = S.st.session_state[S.K_PLAN] is not None
     n_decisions = len(S.st.session_state[S.K_DECISIONS])
+    n_chat = len(S.st.session_state[S.K_CHAT])
 
     cols = st.columns(3)
     with cols[0]:
         card(
-            "Profile",
-            f"<b>{p.name or '—'}</b><br><span class='cg-muted'>"
-            f"{p.background or 'No background captured'}</span>",
-            meta=f"{p.weekly_hours or 0} hrs/wk · {p.timeline_weeks or 0} wks",
-            tags=[("Captured", "ok") if has_profile else ("Empty", "warn")],
-        )
-    with cols[1]:
-        card(
             "Roadmap",
-            "<span class='cg-muted'>No plan generated yet.</span>"
+            "<span class='cg-muted'>No plan generated yet — head to Roadmap to start.</span>"
             if not has_plan
             else f"<b>{S.st.session_state[S.K_PLAN].milestones[0].title if S.st.session_state[S.K_PLAN].milestones else 'Generated'}</b>"
             f"<br><span class='cg-muted'>{len(S.st.session_state[S.K_PLAN].milestones)} milestones</span>",
             tags=[("Ready", "ok") if has_plan else ("Pending", "warn")],
         )
-    with cols[2]:
+    with cols[1]:
         card(
             "Decisions",
             f"<b>{n_decisions}</b> recorded",
             meta="Forks reviewed with rationale",
             tags=[("Auditable", "info")],
+        )
+    with cols[2]:
+        card(
+            "Chat",
+            f"<b>{n_chat // 2}</b> question{'s' if n_chat // 2 != 1 else ''} this session",
+            meta="Free-form questions, profile-aware",
+            tags=[("Active", "ok") if n_chat else ("Idle", "warn")],
         )
 
     _render_html('<div class="cg-divider"></div>')
@@ -61,18 +59,14 @@ def render() -> None:
     _render_html('<div class="cg-divider"></div>')
 
     section_header("Get started", "")
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     with c1:
-        if st.button("👤 Build your profile", use_container_width=True, key="home_btn_profile"):
-            S.st.session_state[S.K_PAGE] = "Profile"
+        if st.button("🚀 Build your roadmap", use_container_width=True, key="home_btn_plan"):
+            S.st.session_state[S.K_PAGE] = "Roadmap"
             st.rerun()
     with c2:
         if st.button("🗺️ Explore the field", use_container_width=True, key="home_btn_explore"):
             S.st.session_state[S.K_PAGE] = "Explore"
-            st.rerun()
-    with c3:
-        if st.button("🚀 Generate a roadmap", use_container_width=True, key="home_btn_plan"):
-            S.st.session_state[S.K_PAGE] = "Roadmap"
             st.rerun()
 
     _render_html(

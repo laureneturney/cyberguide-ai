@@ -600,9 +600,13 @@ def _generic_chat(profile: dict, user: str, rng: random.Random) -> str:
 
 
 def _profiler(profile: dict, user: str, rng: random.Random) -> str:
-    # Lightweight keyword scan against the resume text included in the user
-    # block. The real LLM will do better — this is just a sane offline default.
-    text = (user or "").lower()
+    # The Resume Profiler agent wraps the actual goals/resume in a
+    # `Resume text:` triple-backtick block, then appends the curated
+    # career graph as separate context. We must score against the user's
+    # text ONLY — otherwise the role names in the graph context (e.g.
+    # "GRC Analyst", "Compliance Manager") bias the keyword scan.
+    extract = re.search(r"Resume text:\s*```\s*(.*?)\s*```", user or "", re.DOTALL | re.IGNORECASE)
+    text = (extract.group(1) if extract else (user or "")).lower()
 
     keyword_map = {
         "soc": ["soc", "siem", "splunk", "sentinel", "edr", "incident", "alert", "triage"],

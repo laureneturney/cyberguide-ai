@@ -22,6 +22,8 @@ K_PAGE = "cg_page"
 K_MILESTONE_PROGRESS = "cg_milestone_progress"  # dict[milestone_idx] -> bool
 K_RESUME_ANALYSIS = "cg_resume_analysis"  # last ResumeAnalysis (dict-serialized)
 K_RESUME_TEXT = "cg_resume_text"  # last parsed resume text (for re-analysis)
+K_GOALS_TEXT = "cg_goals_text"  # free-form goals from the Roadmap page
+K_PATHFINDER_CHAT = "cg_pathfinder_chat"  # chat history under the plan
 
 
 def ensure_state() -> None:
@@ -45,6 +47,10 @@ def ensure_state() -> None:
         st.session_state[K_RESUME_ANALYSIS] = None
     if K_RESUME_TEXT not in st.session_state:
         st.session_state[K_RESUME_TEXT] = ""
+    if K_GOALS_TEXT not in st.session_state:
+        st.session_state[K_GOALS_TEXT] = ""
+    if K_PATHFINDER_CHAT not in st.session_state:
+        st.session_state[K_PATHFINDER_CHAT] = []
 
 
 def reset_session() -> None:

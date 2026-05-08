@@ -34,7 +34,6 @@ from src.ui.theme import inject_css, brand_bar
 from src.ui.components import _render_html
 from src.ui import (
     pages_home,
-    pages_profile,
     pages_explore,
     pages_roadmap,
     pages_resources,
@@ -44,11 +43,13 @@ from src.ui import (
 )
 
 
+# Profile page intentionally not surfaced — the Roadmap tab now collects
+# everything (goals, resume, hours/budget) inline. The UserProfile model
+# still exists in state, but the user never edits it through a separate page.
 PAGES: dict[str, callable] = {
     "Home": pages_home.render,
-    "Profile": pages_profile.render,
-    "Explore": pages_explore.render,
     "Roadmap": pages_roadmap.render,
+    "Explore": pages_explore.render,
     "Resources": pages_resources.render,
     "Decisions": pages_decisions.render,
     "Chat": pages_chat.render,
